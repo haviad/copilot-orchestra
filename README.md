@@ -162,7 +162,7 @@ The Conductor agent follows a strict four-stage cycle for every development task
     - Writes minimal code to make the tests pass.
     - Run tests to verify they pass.
     - Apply linting and formatting.
-- **Phase Summary** - `implement-subagent` reports completion back to `Conductor`.
+- **Phase Summary** - `implement-subagent` reports completion back to the `Conductor`.
 
 ### 3. Review Phase (repeated per plan phase)
 - **Quality Check** - `Conductor` invokes the `code-review-subagent` to validate the implementation.
