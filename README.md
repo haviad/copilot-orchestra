@@ -406,7 +406,7 @@ Each agent is defined in a `.agent.md` file that you can modify:
 - Edit the main section to change agent behavior, add new rules, or enforce project-specific conventions.
 
 **Add Custom Tools:**
-- Agents have access to various tools (file operations, terminal commands, etc.). The tool availability is managed by VS Code but you can provide guidance in instructions.
+- Agents have access to various tools (file operations, terminal commands, etc.). The tool availability is managed by VS Code but you can provide guidance in instructions. You can also add MCP servers, if you use any. (I recommend getting `context7` setup.)
 
 ### Creating New Subagents
 
