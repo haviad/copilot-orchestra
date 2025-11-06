@@ -149,9 +149,9 @@ The Conductor agent follows a strict four-stage cycle for every development task
 
 ### 1. Planning Phase
 - **User Request** - You describe what you want to build or change.
-- **Delegates Research** - Conductor invokes the `planning-subagent` to gather comprehensive context about your codebase.
-- **Plan Creation** - Conductor drafts a multi-phase plan (typically 3-10 phases) with specific objectives, files to modify, and tests to write.
-- **Plan Approval** - Conductor stops, allowing you review and approve the plan before any implementation begins.
+- **Delegates Research** - `Conductor` invokes the `planning-subagent` to gather comprehensive context about your codebase.
+- **Plan Creation** - `Conductor` drafts a multi-phase plan (typically 3-10 phases) with specific objectives, files to modify, and tests to write.
+- **Plan Approval** - `Conductor` stops, allowing you review and approve the plan before any implementation begins.
 - **Plan Documentation** - Approved plan is saved to `plans/<task-name>-plan.md`.
 
 ### 2. Implementation Phase (repeated per plan phase)
