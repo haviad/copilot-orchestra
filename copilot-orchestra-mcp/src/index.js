@@ -2,6 +2,7 @@ import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
 import { planApprovalTool, handlePlanApprovalElicitation } from './tools/planApproval.js';
+import { phaseCommitTool, handlePhaseCommitElicitation } from './tools/phaseCommit.js';
 
 // Create MCP server instance
 const server = new Server(
@@ -39,6 +40,22 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
           },
         },
       },
+      {
+        name: phaseCommitTool.name,
+        description: phaseCommitTool.description,
+        inputSchema: {
+          schema: {
+            type: 'object',
+            properties: {
+              decision: { type: 'string', enum: ['commit_and_continue', 'commit_and_pause', 'revise', 'abort'] },
+              commit_message: { type: 'string' },
+              notes: { type: 'string' },
+            },
+            required: ['decision'],
+            additionalProperties: false,
+          },
+        },
+      },
     ],
   };
 });
@@ -48,6 +65,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name } = request.params;
   if (name === 'request_plan_approval') {
     return handlePlanApprovalElicitation(request);
+  }
+  if (name === 'request_phase_commit_approval') {
+    return handlePhaseCommitElicitation(request);
   }
   throw new Error(`Unknown tool: ${name}`);
 });
