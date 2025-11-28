@@ -1,6 +1,7 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
+import { planApprovalTool, handlePlanApprovalElicitation } from './tools/planApproval.js';
 
 // Create MCP server instance
 const server = new Server(
@@ -21,14 +22,33 @@ const server = new Server(
 // List available tools (empty for now, will be populated in Phase 2 & 3)
 server.setRequestHandler(ListToolsRequestSchema, async () => {
   return {
-    tools: [],
+    tools: [
+      {
+        name: planApprovalTool.name,
+        description: planApprovalTool.description,
+        inputSchema: {
+          schema: {
+            type: 'object',
+            properties: {
+              decision: { type: 'string', enum: ['approve', 'request_changes', 'cancel'] },
+              comments: { type: 'string' },
+              approval_summary: { type: 'string' },
+            },
+            required: ['decision'],
+            additionalProperties: false,
+          },
+        },
+      },
+    ],
   };
 });
 
 // Handle tool execution (will be implemented in Phase 2 & 3)
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name } = request.params;
-  
+  if (name === 'request_plan_approval') {
+    return handlePlanApprovalElicitation(request);
+  }
   throw new Error(`Unknown tool: ${name}`);
 });
 
