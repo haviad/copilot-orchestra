@@ -17,10 +17,11 @@ The system solves a critical challenge in AI-assisted development: maintaining c
 - **⏸️ Mandatory Pause Points** - Built-in stops for plan approval and phase commits keep you in control of the development process.
 - **🔄 Iterative Cycles** - Each implementation phase follows the complete cycle: implement → review → commit before proceeding to the next phase.
 - **💎 Keeps Context Concise** - The majority of the work is done in dedicated subagents, each with its own context window and dedciated prompt. This helps reduce hallucinations as the context window fills up.
+- **🚀 MCP Elicitation (Optional)** - Inline user approvals during pause points via Model Context Protocol, transforming multi-session workflows into seamless conversations.
 
 ## Architecture Overview
 
-The Orchestra system consists of four specialized agents:
+The Orchestra system consists of four specialized agents and an optional MCP server for enhanced workflow:
 
 ### Conductor Agent
 - `Conductor.agent.md` - Main orchestration agent that manages the complete development cycle.
@@ -50,6 +51,13 @@ The Orchestra system consists of four specialized agents:
     - Validates test coverage and code quality.
     - Returns review results back to Conductor (`APPROVED/NEEDS_REVISION/FAILED`).
     - Uses Claude Sonnet 4.5 by default.
+
+### MCP Server (Optional)
+- **`copilot-orchestra-mcp/`** - Model Context Protocol server for inline elicitation.
+    - Provides `request_plan_approval` tool for seamless plan approval.
+    - Provides `request_phase_commit_approval` tool for inline phase commits.
+    - Transforms pause points into continuous conversation flow.
+    - Falls back gracefully to manual approval if unavailable.
 
 ## Prerequisites
 
@@ -134,6 +142,41 @@ The GitHub Copilot Orchestra uses custom chat modes in VSCode Insiders to enable
 
 **No Additional Configuration Required** - The agents will appear in the GitHub Copilot Chat interface automatically.
 
+### MCP Server Setup (Optional)
+
+For enhanced inline approvals during pause points, set up the optional MCP server:
+
+1. **Install MCP Server Dependencies**
+   ```bash
+   cd copilot-orchestra-mcp
+   npm install
+   ```
+
+2. **Test the Server**
+   ```bash
+   npm test
+   ```
+
+3. **Verify VS Code Configuration**
+   The `.vscode/settings.json` file should already be configured. If not, create it with:
+   ```json
+   {
+     "github.copilot.chat.mcp.enabled": true,
+     "github.copilot.chat.mcp.servers": {
+       "copilot-orchestra-elicitation": {
+         "command": "node",
+         "args": ["copilot-orchestra-mcp/src/index.js"]
+       }
+     }
+   }
+   ```
+
+4. **Reload VS Code**
+   - Restart VS Code Insiders to activate the MCP server
+   - The Conductor will automatically use inline elicitation when available
+
+**Note:** If the MCP server is unavailable, the Conductor gracefully falls back to manual approval mode.
+
 ## Using the Conductor Agent
 
 Once setup is complete, you can start using the Conductor agent:
@@ -142,6 +185,39 @@ Once setup is complete, you can start using the Conductor agent:
 - Open GitHub Copilot Chat
 - Click the agent dropdown at the bottom of the chat panel
 - Select "Conductor" from the list of available modes
+
+## Using MCP Elicitation
+
+When the MCP server is configured, the Conductor agent uses inline approval forms at pause points:
+
+### Plan Approval
+Instead of presenting the plan and stopping, the Conductor shows a form with:
+- **Decision Options:** approve, request_changes, cancel
+- **Comments Field:** Optional feedback or change requests
+- **Summary Field:** Auto-populated plan overview
+
+Based on your decision:
+- **approve** → Proceeds to implementation
+- **request_changes** → Revises plan with your feedback
+- **cancel** → Aborts the workflow
+
+### Phase Commit Approval
+After each phase review, instead of stopping, the Conductor shows a form with:
+- **Decision Options:** commit_and_continue, commit_and_pause, revise, abort
+- **Commit Message Field:** Pre-filled git commit message (editable)
+- **Notes Field:** Optional notes about the phase
+
+Based on your decision:
+- **commit_and_continue** → Advances to next phase automatically
+- **commit_and_pause** → Stops after commit for you to review
+- **revise** → Returns to implementation with your feedback
+- **abort** → Stops the workflow entirely
+
+### Benefits
+- **Seamless Flow:** No context switching between sessions
+- **Faster Iteration:** Approve and continue in one action
+- **Inline Feedback:** Provide change requests without breaking flow
+- **Backward Compatible:** Automatically falls back if MCP unavailable
 
 ## How It Works
 
@@ -422,6 +498,47 @@ You can create specialized subagents for your workflow:
 - **security-audit-subagent** - Focused on security analysis.
 - **performance-optimization-subagent** - Optimizes code performance.
 - **documentation-subagent** - Generates comprehensive documentation.
+
+## Troubleshooting
+
+### MCP Server Issues
+
+**MCP tools not appearing in Conductor:**
+- Verify Node.js version 18+ is installed: `node --version`
+- Check `.vscode/settings.json` has correct MCP configuration
+- Reload VS Code window after configuration changes
+- Verify MCP server starts: `cd copilot-orchestra-mcp && npm start`
+- Check VS Code Output panel (View → Output → select "GitHub Copilot Chat MCP")
+
+**Server fails to start:**
+- Ensure dependencies installed: `cd copilot-orchestra-mcp && npm install`
+- Check for syntax errors: `node --check copilot-orchestra-mcp/src/index.js`
+- Verify file paths in `.vscode/settings.json` are correct
+- Review error logs in VS Code Output panel
+
+**Conductor falls back to manual approval:**
+- This is expected behavior when MCP server is unavailable
+- Workflow continues normally with "MANDATORY STOP" prompts
+- No functionality is lost, only inline approval convenience
+
+### General Issues
+
+**Agents not appearing in chat mode dropdown:**
+- Verify `.agent.md` files are in correct location (workspace root or User Data)
+- Restart VS Code Insiders
+- Check file names match exactly (case-sensitive)
+
+**Subagent invocation fails:**
+- Ensure all four agent files are installed
+- Check agent names in Conductor match subagent file names
+- Verify GitHub Copilot Chat extension is active
+
+**Plan or phase files not created:**
+- Verify `plans/` directory exists in workspace root
+- Check workspace has write permissions
+- Create directory manually if needed: `mkdir plans`
+
+For more detailed MCP setup and troubleshooting, see `MCP_SETUP_GUIDE.md`.
 
 ## License
 

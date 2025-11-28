@@ -61,24 +61,95 @@ To use this MCP server with VS Code and the Conductor agent, add to your workspa
 
 ## Using in Other Projects
 
-To use this MCP server in another project:
+To use this MCP server in another project that uses Copilot Orchestra:
+
+### Method 1: Copy to New Project
 
 1. **Copy the Directory:**
    ```bash
    cp -r copilot-orchestra-mcp /path/to/your/project/
+   cd /path/to/your/project/copilot-orchestra-mcp
    ```
 
 2. **Install Dependencies:**
    ```bash
-   cd /path/to/your/project/copilot-orchestra-mcp
    npm install
    ```
 
-3. **Configure VS Code:**
-   Update your project's `.vscode/settings.json` with the MCP server configuration shown above.
+3. **Test the Server:**
+   ```bash
+   npm test
+   ```
 
-4. **Restart VS Code:**
-   Reload the window for the MCP server to be detected.
+4. **Configure VS Code:**
+   Create or update `.vscode/settings.json` in your project root:
+   ```json
+   {
+     "github.copilot.chat.mcp.enabled": true,
+     "github.copilot.chat.mcp.servers": {
+       "copilot-orchestra-elicitation": {
+         "command": "node",
+         "args": ["copilot-orchestra-mcp/src/index.js"]
+       }
+     }
+   }
+   ```
+
+5. **Restart VS Code:**
+   Reload the window (`Developer: Reload Window`) for the MCP server to be detected.
+
+### Method 2: Shared Installation
+
+If you want to use one MCP server installation across multiple projects:
+
+1. **Install in a Central Location:**
+   ```bash
+   # Example: Install in home directory
+   cd ~
+   git clone <repo-url> copilot-orchestra-shared
+   cd copilot-orchestra-shared/copilot-orchestra-mcp
+   npm install
+   ```
+
+2. **Configure Each Project:**
+   In each project's `.vscode/settings.json`, use absolute path:
+   ```json
+   {
+     "github.copilot.chat.mcp.enabled": true,
+     "github.copilot.chat.mcp.servers": {
+       "copilot-orchestra-elicitation": {
+         "command": "node",
+         "args": ["/Users/username/copilot-orchestra-shared/copilot-orchestra-mcp/src/index.js"]
+       }
+     }
+   }
+   ```
+
+3. **Alternatively, Use Workspace Variable:**
+   Create a symlink in each project:
+   ```bash
+   cd /path/to/your/project
+   ln -s ~/copilot-orchestra-shared/copilot-orchestra-mcp ./copilot-orchestra-mcp
+   ```
+   
+   Then use relative path in settings as shown in Method 1.
+
+### Using with Custom Conductor Agents
+
+If you've customized the Conductor agent for your project:
+
+1. Ensure the Conductor invokes `#request_plan_approval` and `#request_phase_commit_approval` tools
+2. Add fallback logic for when MCP tools are unavailable
+3. See the main repository's `Conductor.agent.md` for reference implementation
+
+### Verifying Installation
+
+After setup, verify the MCP server works:
+
+1. Open VS Code in your project
+2. Check Output panel (View → Output → "GitHub Copilot Chat MCP")
+3. Look for: `Copilot Orchestra MCP server running on stdio`
+4. Start a Conductor workflow and check for inline approval forms
 
 ## Development
 
