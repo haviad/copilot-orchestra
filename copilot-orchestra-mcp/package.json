@@ -1,0 +1,20 @@
+{
+  "name": "copilot-orchestra-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Copilot Orchestra inline user elicitation",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0"
+  },
+  "keywords": ["mcp", "copilot", "orchestra", "elicitation"],
+  "license": "MIT"
+}

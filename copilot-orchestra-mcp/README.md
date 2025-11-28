@@ -1,0 +1,128 @@
+# Copilot Orchestra MCP Server
+
+MCP (Model Context Protocol) server for Copilot Orchestra that enables inline user elicitation during pause points.
+
+## Overview
+
+This MCP server provides two elicitation tools that transform the Copilot Orchestra workflow from fragmented multi-session interactions into a seamless, continuous conversation:
+
+- **`request_plan_approval`** - Inline approval for implementation plans
+- **`request_phase_commit_approval`** - Inline approval for phase commits
+
+## Prerequisites
+
+- **Node.js** 18.0.0 or higher
+- **VS Code Insiders** 1.101 or higher
+- **GitHub Copilot** subscription with Chat extension
+
+## Installation
+
+### 1. Install Dependencies
+
+```bash
+cd copilot-orchestra-mcp
+npm install
+```
+
+### 2. Test the Server
+
+```bash
+npm test
+```
+
+### 3. Start the Server (for testing)
+
+```bash
+npm start
+```
+
+The server runs on stdio and will output: `Copilot Orchestra MCP server running on stdio`
+
+## VS Code Configuration
+
+To use this MCP server with VS Code and the Conductor agent, add to your workspace `.vscode/settings.json`:
+
+```json
+{
+  "github.copilot.advanced": {
+    "mcp": {
+      "enabled": true,
+      "servers": [
+        {
+          "name": "copilot-orchestra",
+          "command": "node",
+          "args": ["${workspaceFolder}/copilot-orchestra-mcp/src/index.js"]
+        }
+      ]
+    }
+  }
+}
+```
+
+## Using in Other Projects
+
+To use this MCP server in another project:
+
+1. **Copy the Directory:**
+   ```bash
+   cp -r copilot-orchestra-mcp /path/to/your/project/
+   ```
+
+2. **Install Dependencies:**
+   ```bash
+   cd /path/to/your/project/copilot-orchestra-mcp
+   npm install
+   ```
+
+3. **Configure VS Code:**
+   Update your project's `.vscode/settings.json` with the MCP server configuration shown above.
+
+4. **Restart VS Code:**
+   Reload the window for the MCP server to be detected.
+
+## Development
+
+### Running Tests
+
+```bash
+npm test              # Run tests once
+npm run test:watch    # Watch mode
+```
+
+### Project Structure
+
+```
+copilot-orchestra-mcp/
+├── package.json           # Project manifest
+├── README.md             # This file
+├── src/
+│   ├── index.js          # MCP server entry point
+│   ├── tools/            # Tool implementations (Phase 2 & 3)
+│   └── elicitation/      # Elicitation schemas (Phase 2 & 3)
+└── tests/
+    ├── server.test.js    # Server initialization tests
+    └── transport.test.js # Transport tests
+```
+
+## Troubleshooting
+
+### Server Not Starting
+
+- Verify Node.js version: `node --version` (should be 18+)
+- Check for syntax errors: `node --check src/index.js`
+- Review VS Code Output panel for errors
+
+### Tools Not Appearing in Conductor
+
+- Ensure MCP server is configured in `.vscode/settings.json`
+- Reload VS Code window after configuration changes
+- Check that the file path in settings is correct
+- Verify server is running (check VS Code Output → MCP Logs)
+
+### Fallback to Manual Approval
+
+If MCP tools are not available, the Conductor agent will automatically fall back to the manual "MANDATORY STOP" approval mode. This ensures backward compatibility.
+
+## License
+
+MIT
